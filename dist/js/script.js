@@ -297,7 +297,7 @@ window.addEventListener(`DOMContentLoaded`, () => {
     form.addEventListener('submit', e => {
       // Событие submit срабатывает каждый раз, когда форма отправляется
       e.preventDefault();
-      const statusMessage = document.createElement('img');
+      let statusMessage = document.createElement('img');
       statusMessage.src = message.loading;
       statusMessage.style.cssText = `
                 display: block;
@@ -305,11 +305,6 @@ window.addEventListener(`DOMContentLoaded`, () => {
             `; // form.append(statusMessage);
 
       form.insertAdjacentElement('afterend', statusMessage);
-      const request = new XMLHttpRequest();
-      request.open('POST', 'server.php'); // request.setRequestHeader('Content-type', 'multipart/form-dat'); // Не нужно устанавливать заголовки для работы с FormData
-
-      request.setRequestHeader('Content-type', 'application/json'); // Заголовок для работы с JSON
-
       const formData = new FormData(form); // Объект, позволяющий быстро получить данные из формы, в формате (ключ: значение)
       //Не будет работать если в инпутах формы (или другом интерактиве) не указан атрибут name
       //<-----Превращение FormData в JSON---->
@@ -320,19 +315,25 @@ window.addEventListener(`DOMContentLoaded`, () => {
       });
       const json = JSON.stringify(object); // <---------------------------------->
 
-      request.send(json); // Отправляем данные на сервер
-      // request.send(formData);
+      fetch('server.php', {
+        // Отправка данных на сервер
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json' // Для JSON
 
-      request.addEventListener('load', () => {
-        if (request.status === 200) {
-          console.log(request.response);
-          showThanksModal(message.success);
-          form.reset(); // Очищаем форму
-
-          statusMessage.remove();
-        } else {
-          showThanksModal(message.failure);
-        }
+        },
+        body: json
+      }).then(data => {
+        // Обрабатываем статус запроса с помощью промисов
+        console.log(data);
+        showThanksModal(message.success);
+        statusMessage.remove();
+      }).catch(() => {
+        // Ошибка
+        showThanksModal(message.failure);
+      }).finally(() => {
+        // Выполнится в любом случае
+        form.reset(); // Очищаем форму
       });
     });
   }
