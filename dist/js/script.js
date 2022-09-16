@@ -278,12 +278,36 @@ window.addEventListener(`DOMContentLoaded`, () => {
       this.parent.append(element);
     }
 
-  }
+  } // Реализация получения данных с сервера
 
-  new MenuCard("img/tabs/vegy.jpg", "vegy", `Меню "Фитнес"`, `Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!`, 9, `.menu .container`, `menu__item`, `big`).render(); // Если объект используется один раз то такой вариант
 
-  new MenuCard("img/tabs/elite.jpg", "elite", `Меню “Премиум”`, `В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!`, 14, `.menu .container`, `menu__item`).render();
-  new MenuCard("img/tabs/post.jpg", "post", `Меню "Постное"`, `Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.`, 21, `.menu .container`, `menu__item`).render(); //Реализация отправки данных на сервер
+  const getResource = async url => {
+    // Функция отправки данных с БД в клиент
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`Couldn't fetch ${url}, status: ${res.status}`);
+    }
+
+    return await res.json(); // Метод json() тоже построен на промисах, поэтому необходимо дождаться его ответа.
+  };
+
+  getResource('http://localhost:3000/menu') // При помощи запроса на сервер получаем массив с объектами
+  .then(data => {
+    // Обрабатываем полученный промис
+    console.log(data);
+    data.forEach(_ref => {
+      let {
+        img,
+        altimg,
+        title,
+        descr,
+        price
+      } = _ref;
+      // Перебираем каждый объект внутри массива и деструктуризируем его на отдельные свойства
+      new MenuCard(img, altimg, title, descr, price, '.menu .container').render(); // Запускаем конструктор объекта карточки меню и передаем внутрь него все полученные из БД аргументы
+    });
+  }); //Реализация отправки данных на сервер
 
   const forms = document.querySelectorAll('form');
   const message = {
@@ -291,9 +315,24 @@ window.addEventListener(`DOMContentLoaded`, () => {
     success: 'Спасибо! Скоро мы с вами свяжемся',
     failure: 'Что-то пошло не так...'
   };
-  forms.forEach(item => postData(item)); // Привязка ко всем формам на сайте
+  forms.forEach(item => bindPostData(item)); // Привязка ко всем формам на сайте
 
-  function postData(form) {
+  const postData = async (url, data) => {
+    // async - указывает на то что внутри функции будет какой-то асинхронный код
+    const res = await fetch(url, {
+      // Fetch работает абсолютно асинхронно т.е. - в переменную резалт запишется какой то промис (но неизвестно какой, т.к. ответ от сервера ещё не получен)
+      method: "POST",
+      // AWAIT - ставится перед операциями, ответа которых необходимо дождаться
+      headers: {
+        // В таком случае в переменную резалт поместится какой то полученный ответ от сервера, а не просто undefind
+        'Content-Type': 'application/json'
+      },
+      body: data
+    });
+    return await res.json(); // Метод json() тоже построен на промисах, поэтому необходимо дождаться его ответа.
+  };
+
+  function bindPostData(form) {
     form.addEventListener('submit', e => {
       // Событие submit срабатывает каждый раз, когда форма отправляется
       e.preventDefault();
@@ -309,21 +348,13 @@ window.addEventListener(`DOMContentLoaded`, () => {
       //Не будет работать если в инпутах формы (или другом интерактиве) не указан атрибут name
       //<-----Превращение FormData в JSON---->
 
-      const object = {};
-      formData.forEach((value, key) => {
-        object[key] = value;
-      });
-      const json = JSON.stringify(object); // <---------------------------------->
+      const json = JSON.stringify(Object.fromEntries(formData.entries())); // formData.entries() - получаем данные с формы в формате массив массивов [[][]]
+      // Object.fromEntries() - превращаем массив массивов в класический объект
+      // JSON.stringify() - превращаем классический объект в JSON
+      // <---------------------------------->
 
-      fetch('server.php', {
-        // Отправка данных на сервер
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json' // Для JSON
-
-        },
-        body: json
-      }).then(data => {
+      postData('http://localhost:3000/requests', json) // Отсюда вернется промис, который мы с помощью зенов сможем нормально обработать
+      .then(data => {
         // Обрабатываем статус запроса с помощью промисов
         console.log(data);
         showThanksModal(message.success);
@@ -357,7 +388,10 @@ window.addEventListener(`DOMContentLoaded`, () => {
       prevModalDialog.classList.remove('hide');
       closeModal();
     }, 5000);
-  }
+  } // fetch('http://localhost:3000/menu')
+  //     .then(data => data.json())
+  //     .then(res => console.log(res));
+
 });
 
 /***/ })
