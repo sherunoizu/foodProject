@@ -1,7 +1,10 @@
-function forms() {
+import { closeModal, openModal } from './modal';
+import { postData } from '../services/services';
+
+function forms(formSelector, modalTimerId) {
     //Реализация отправки данных на сервер
 
-    const forms = document.querySelectorAll('form');
+    const forms = document.querySelectorAll(formSelector);
 
     const message = {
         loading: 'img/form/spinner.svg',
@@ -11,17 +14,7 @@ function forms() {
 
     forms.forEach(item => bindPostData(item)); // Привязка ко всем формам на сайте
 
-    const postData = async (url, data) => { // async - указывает на то что внутри функции будет какой-то асинхронный код
-        const res = await fetch(url, { // Fetch работает абсолютно асинхронно т.е. - в переменную резалт запишется какой то промис (но неизвестно какой, т.к. ответ от сервера ещё не получен)
-            method: "POST", // AWAIT - ставится перед операциями, ответа которых необходимо дождаться
-            headers: { // В таком случае в переменную резалт поместится какой то полученный ответ от сервера, а не просто undefind
-                'Content-Type': 'application/json'
-            },
-            body: data
-        });
-
-        return await res.json(); // Метод json() тоже построен на промисах, поэтому необходимо дождаться его ответа.
-    };
+    
 
     function bindPostData(form) {
         form.addEventListener('submit', (e) => { // Событие submit срабатывает каждый раз, когда форма отправляется
@@ -63,7 +56,7 @@ function forms() {
         const prevModalDialog = document.querySelector('.modal__dialog');
 
         prevModalDialog.classList.add(`hide`);
-        openModal();
+        openModal(`.modal`, modalTimerId);
 
         const thanksModal = document.createElement('div');
         thanksModal.classList.add('modal__dialog');
@@ -79,9 +72,9 @@ function forms() {
             thanksModal.remove();
             prevModalDialog.classList.add('show');
             prevModalDialog.classList.remove('hide');
-            closeModal();
+            closeModal(`.modal`);
         }, 5000);
     }
 }
 
-module.exports = forms;
+export default forms;

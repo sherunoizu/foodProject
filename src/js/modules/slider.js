@@ -1,17 +1,17 @@
-function slider() {
+function slider({container, slide, nextArrow, prevArrow, totalCounter, currentCounter, wrapper, field}) {
     //Создание слайдера (Карусель)
 
-    const slides = document.querySelectorAll('.offer__slide'),
-        slider = document.querySelector('.offer__slider'),
-        prev = document.querySelector('.offer__slider-prev'),
-        next = document.querySelector('.offer__slider-next'),
-        total = document.querySelector('#total'),
-        current = document.querySelector('#current'),
-        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-        slidesField = document.querySelector('.offer__slider-inner'),
+    const slides = document.querySelectorAll(slide), //slide
+        slider = document.querySelector(container), // container
+        prev = document.querySelector(prevArrow),
+        next = document.querySelector(nextArrow),
+        total = document.querySelector(totalCounter),
+        current = document.querySelector(currentCounter),
+        slidesWrapper = document.querySelector(wrapper),
+        slidesField = document.querySelector(field),
         width = window.getComputedStyle(slidesWrapper).width; // Получаем примененные стили CSS
     const indicators = document.createElement('ol'),
-        dots = [];
+          dots = [];
 
     // Для этого слайдера нам понадобится в HTML создать внутри обертки слайдеров ещё одну
     // slider-inner. Wrapper будет служить окном, через которое мы можем видеть весь
@@ -132,4 +132,4 @@ function slider() {
     });
 }
 
-module.exports = slider;
+export default slider;

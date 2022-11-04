@@ -1,3 +1,5 @@
+import { getResource } from "../services/services";
+
 function cards() {
     // Используем классы для карточек
     class MenuCard {
@@ -42,17 +44,7 @@ function cards() {
         }
     }
 
-    // Реализация получения данных с сервера
-
-    const getResource = async (url) => { // Функция отправки данных с БД в клиент
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Couldn't fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json(); // Метод json() тоже построен на промисах, поэтому необходимо дождаться его ответа.
-    };
+   
 
     getResource('http://localhost:3000/menu') // При помощи запроса на сервер получаем массив с объектами
         .then(data => { // Обрабатываем полученный промис
@@ -72,4 +64,4 @@ function cards() {
     
 }
 
-module.exports = cards;
+export default cards;
