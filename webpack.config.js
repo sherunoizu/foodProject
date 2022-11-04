@@ -1,6 +1,6 @@
 'use strict';
 
-let path = require('path');
+let path = require('path'); // Встроенный инструмент для работы с путями
 
 module.exports = {
   mode: 'development', // Режим работы. Development - Разработка, используются не все плагины оптимизации. Production - продакшн, собираем им уже готовый проект. None - никакой
